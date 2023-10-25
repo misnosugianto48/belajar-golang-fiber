@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -17,8 +18,10 @@ func main() {
 		return c.SendString("Hello World")
 	})
 
-	err := app.Listen("127.0.0.1:3000")
-	if err != nil {
-		panic(err)
-	}
+	// err := app.Listen("127.0.0.1:3000")
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	log.Fatal(app.Listen(":3000"))
 }

@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
@@ -69,4 +70,39 @@ func TestHttpReq(t *testing.T) {
 	bytes, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.Equal(t, "Hello Misno Sugianto", string(bytes))
+}
+
+func TestRouteParams(t *testing.T) {
+	app.Get("/users/:userId/orders/:orderId", func(c *fiber.Ctx) error {
+		userId := c.Params("userId")
+		orderId := c.Params("orderId")
+		return c.SendString("Get Order " + orderId + " from User " + userId)
+	})
+
+	req := httptest.NewRequest("GET", "/users/misno/orders/3", nil)
+	res, err := app.Test(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, res.StatusCode)
+
+	bytes, err := io.ReadAll(res.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, "Get Order 3 from User misno", string(bytes))
+}
+
+func TestReqForm(t *testing.T) {
+	app.Post("/hello", func(c *fiber.Ctx) error {
+		name := c.FormValue("name")
+		return c.SendString("Hello " + name)
+	})
+
+	body := strings.NewReader("name=Misno")
+	req := httptest.NewRequest("POST", "/hello", body)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	res, err := app.Test(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, res.StatusCode)
+
+	bytes, err := io.ReadAll(res.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, "Hello Misno", string(bytes))
 }
